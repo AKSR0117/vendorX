@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Inventory System</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 25px auto;
+        }
+
+        section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(180px, 1fr));
+
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .danger {
+            background: #dc2626;
+        }
+
+        .success {
+            background: #16a34a;
+        }
+
+        .warning {
+            background: #d97706;
+        }
+
+        .secondary {
+            background: #4b5563;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: 15px;
+        }
+
+        .card {
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .card h3 {
+            margin-top: 0;
+        }
+
+        .big-number {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .positive {
+            color: green;
+            font-weight: bold;
+        }
+
+        .negative {
+            color: red;
+            font-weight: bold;
+        }
+
+        .action {
+            padding: 5px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .action-sale {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .action-restock {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .action-add {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .action-adjust {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .scanner-box {
+            text-align: center;
+        }
+
+        video {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
+            background: black;
+        }
+
+        canvas {
+            display: none;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            background: #eef2ff;
+        }
+
+        .chart {
+            width: 100%;
+            min-height: 250px;
+            margin-top: 20px;
+        }
+
+        .bar-container {
+            margin: 15px 0;
+        }
+
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .bar {
+            height: 25px;
+            background: #2563eb;
+            border-radius: 5px;
+        }
+
+        @media(max-width: 700px) {
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+        }
+
+    </style>
+<script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.js"></script>
+
+</head>
+
+
+<body>
+
+<header>
+
+    <h1>Smart Inventory Management System</h1>
+
+    <p>
+        Barcode • Inventory • Sales • Reports
+    </p>
+
+</header>
+
+
+<div class="container">
+
+
+<!-- ================= DASHBOARD ================= -->
+
+<section>
+
+    <h2>Dashboard</h2>
+
+    <div class="cards">
+
+        <div class="card">
+
+            <h3>Total Products</h3>
+
+            <div
+                class="big-number"
+                id="totalProducts">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Total Stock</h3>
+
+            <div
+                class="big-number"
+                id="totalStock">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Low Stock</h3>
+
+            <div
+                class="big-number"
+                id="lowStock">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Total Sales</h3>
+
+            <div
+                class="big-number"
+                id="totalSales">
+                ₹0
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= SALES REPORT ================= -->
+
+<section>
+
+    <h2>Sales Report</h2>
+
+    <div class="cards">
+
+        <div class="card">
+
+            <h3>Transactions</h3>
+
+            <div
+                class="big-number"
+                id="transactions">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Items Sold</h3>
+
+            <div
+                class="big-number"
+                id="itemsSold">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Revenue</h3>
+
+            <div
+                class="big-number"
+                id="revenue">
+                ₹0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Today's Sales</h3>
+
+            <div
+                class="big-number"
+                id="todaySales">
+                ₹0
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= ADD PRODUCT ================= -->
+
+<section>
+
+    <h2>Add Product</h2>
+
+    <div class="form-grid">
+
+        <div>
+            <label>Barcode</label>
+
+            <input
+                id="addBarcode"
+                placeholder="8901234567890">
+        </div>
+
+
+        <div>
+            <label>Product Name</label>
+
+            <input
+                id="addName"
+                placeholder="Rice 1 KG">
+        </div>
+
+
+        <div>
+            <label>Category</label>
+
+            <input
+                id="addCategory"
+                placeholder="Grocery">
+        </div>
+
+
+        <div>
+            <label>Price</label>
+
+            <input
+                id="addPrice"
+                type="number"
+                placeholder="60">
+        </div>
+
+
+        <div>
+            <label>Quantity</label>
+
+            <input
+                id="addQuantity"
+                type="number"
+                step="0.01"
+                placeholder="25">
+        </div>
+
+
+        <div>
+            <label>Unit</label>
+
+            <input
+                id="addUnit"
+                placeholder="kg">
+        </div>
+
+
+        <div>
+            <label>Low Stock Level</label>
+
+            <input
+                id="addLowStock"
+                type="number"
+                value="5">
+        </div>
+
+    </div>
+
+
+    <button onclick="addProduct()">
+        Add Product
+    </button>
+
+</section>
+
+
+<!-- ================= BARCODE ================= -->
+
+<section>
+
+    <h2>Barcode Lookup</h2>
+
+    <div class="form-grid">
+
+        <input
+            id="lookupBarcode"
+            placeholder="Enter barcode">
+
+        <button onclick="lookupProduct()">
+            Search
+        </button>
+
+    </div>
+
+    <div id="lookupResult"></div>
+
+</section>
+
+
+<!-- ================= BARCODE SCANNER ================= -->
+
+<section>
+
+    <h2>Barcode Scanner</h2>
+
+    <div id="scanner"
+         style="
+            width:100%;
+            max-width:600px;
+            margin:auto;
+            min-height:300px;
+            background:#000;
+            overflow:hidden;
+            border-radius:10px;
+         ">
+    </div>
+
+    <button onclick="startScanner()">
+        Start Scanner
+    </button>
+
+    <button
+        class="danger"
+        onclick="stopScanner()">
+        Stop Scanner
+    </button>
+
+    <p id="scannerMessage">
+        Scanner ready.
+    </p>
+
+</section>
+
+
+<!-- ================= SELL ================= -->
+
+<section>
+
+    <h2>Sell Product</h2>
+
+    <div class="form-grid">
+
+        <input
+            id="sellBarcode"
+            placeholder="Barcode">
+
+        <input
+            id="sellQuantity"
+            type="number"
+            step="0.01"
+            placeholder="Quantity">
+
+    </div>
+
+    <button
+        class="success"
+        onclick="sellProduct()">
+
+        Sell Product
+
+    </button>
+
+    <div id="sellResult"></div>
+
+</section>
+
+
+<!-- ================= RESTOCK ================= -->
+
+<section>
+
+    <h2>Restock Product</h2>
+
+    <div class="form-grid">
+
+        <input
+            id="restockBarcode"
+            placeholder="Barcode">
+
+        <input
+            id="restockQuantity"
+            type="number"
+            step="0.01"
+            placeholder="Quantity">
+
+    </div>
+
+    <button
+        class="success"
+        onclick="restockProduct()">
+
+        Restock
+
+    </button>
+
+    <div id="restockResult"></div>
+
+</section>
+
+
+<!-- ================= STOCK ADJUST ================= -->
+
+<section>
+
+    <h2>Stock Adjustment</h2>
+
+    <p>
+        Use positive quantity to add stock and
+        negative quantity to remove stock.
+    </p>
+
+    <div class="form-grid">
+
+        <input
+            id="adjustBarcode"
+            placeholder="Barcode">
+
+        <input
+            id="adjustQuantity"
+            type="number"
+            step="0.01"
+            placeholder="+5 or -2">
+
+        <input
+            id="adjustReason"
+            placeholder="Reason e.g. damaged">
+
+    </div>
+
+    <button
+        class="warning"
+        onclick="adjustStock()">
+
+        Adjust Stock
+
+    </button>
+
+    <div id="adjustResult"></div>
+
+</section>
+
+
+<!-- ================= INVENTORY ================= -->
+
+<section>
+
+    <h2>Inventory</h2>
+
+    <button
+        class="success"
+        onclick="loadProducts()">
+
+        Refresh Inventory
+
+    </button>
+
+    <button
+        onclick="downloadInventory()">
+
+        Export Inventory CSV
+
+    </button>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Barcode</th>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Low Stock</th>
+                <th>Actions</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="productsTable"></tbody>
+
+    </table>
+
+</section>
+
+
+<!-- ================= LOW STOCK ================= -->
+
+<section>
+
+    <h2>Low Stock Products</h2>
+
+    <button
+        class="warning"
+        onclick="loadLowStock()">
+
+        Check Low Stock
+
+    </button>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Product</th>
+                <th>Barcode</th>
+                <th>Stock</th>
+                <th>Limit</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="lowStockTable"></tbody>
+
+    </table>
+
+</section>
+
+
+<!-- ================= SALES HISTORY ================= -->
+
+<section>
+
+    <h2>Sales History</h2>
+
+    <button
+        onclick="loadSales()">
+
+        Refresh Sales
+
+    </button>
+
+    <button
+        class="success"
+        onclick="downloadSales()">
+
+        Export Sales CSV
+
+    </button>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Product</th>
+                <th>Barcode</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Date</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="salesTable"></tbody>
+
+    </table>
+
+</section>
+
+
+<!-- ================= INVENTORY HISTORY ================= -->
+
+<section>
+
+    <h2>Inventory History</h2>
+
+    <div class="form-grid">
+
+        <div>
+
+            <label>Search Product</label>
+
+            <input
+                id="historySearch"
+                placeholder="Product name"
+                oninput="filterInventoryHistory()">
+
+        </div>
+
+
+        <div>
+
+            <label>Barcode</label>
+
+            <input
+                id="historyBarcode"
+                placeholder="Barcode"
+                oninput="filterInventoryHistory()">
+
+        </div>
+
+
+        <div>
+
+            <label>Action</label>
+
+            <select
+                id="historyAction"
+                onchange="filterInventoryHistory()">
+
+                <option value="ALL">
+                    All
+                </option>
+
+                <option value="ADD">
+                    Add
+                </option>
+
+                <option value="SALE">
+                    Sale
+                </option>
+
+                <option value="RESTOCK">
+                    Restock
+                </option>
+
+                <option value="ADJUST">
+                    Adjust
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <button
+        class="secondary"
+        onclick="clearHistoryFilters()">
+
+        Clear Filters
+
+    </button>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Product</th>
+                <th>Barcode</th>
+                <th>Action</th>
+                <th>Quantity Change</th>
+                <th>Stock After</th>
+                <th>Reason</th>
+                <th>Date</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="inventoryHistoryTable"></tbody>
+
+    </table>
+
+</section>
+
+
+<!-- ================= CAMERA ================= -->
+
+<section>
+
+    <h2>Camera Capture</h2>
+
+    <div class="scanner-box">
+
+        <video
+            id="cameraVideo"
+            autoplay>
+        </video>
+
+        <br>
+
+        <button
+            onclick="startCamera()">
+
+            Start Camera
+
+        </button>
+
+
+        <button
+            onclick="captureImage()">
+
+            Capture Image
+
+        </button>
+
+
+        <button
+            class="danger"
+            onclick="stopCamera()">
+
+            Stop Camera
+
+        </button>
+
+        <canvas id="cameraCanvas"></canvas>
+
+        <p id="cameraMessage"></p>
+
+    </div>
+
+</section>
+
+
+<!-- ================= CHARTS ================= -->
+
+<section>
+
+    <h2>Stock Overview</h2>
+
+    <div
+        id="stockChart"
+        class="chart">
+    </div>
+
+</section>
+
+
+</div>
+
+
+<script>
+
+
+// ========================================
+// GLOBAL DATA
+// ========================================
+
+let productsCache = [];
+
+let inventoryHistoryCache = [];
+
+let scannerStream = null;
+
+let cameraStream = null;
+
+
+// ========================================
+// HELPER
+// ========================================
+
+function showMessage(elementId, message) {
+
+    document.getElementById(elementId).innerHTML =
+        `<div class="message">${message}</div>`;
+}
+
+
+// ========================================
+// ADD PRODUCT
+// ========================================
+
+async function addProduct() {
+
+    const data = {
+
+        barcode:
+            document.getElementById("addBarcode").value,
+
+        name:
+            document.getElementById("addName").value,
+
+        category:
+            document.getElementById("addCategory").value,
+
+        price:
+            document.getElementById("addPrice").value,
+
+        quantity:
+            document.getElementById("addQuantity").value,
+
+        unit:
+            document.getElementById("addUnit").value,
+
+        low_stock_level:
+            document.getElementById("addLowStock").value
+
+    };
+
+
+    const response =
+        await fetch("/add-product", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify(data)
+
+        });
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        alert(result.error);
+
+        return;
+    }
+
+
+    alert(result.message);
+
+    loadProducts();
+
+    loadDashboard();
+
+}
+
+
+// ========================================
+// BARCODE LOOKUP
+// ========================================
+
+async function lookupProduct() {
+
+    const barcode =
+        document.getElementById(
+            "lookupBarcode"
+        ).value.trim();
+
+
+    if (!barcode) {
+
+        alert("Enter barcode");
+
+        return;
+    }
+
+
+    const response =
+        await fetch(
+            "/product/" +
+            encodeURIComponent(barcode)
+        );
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        document.getElementById(
+            "lookupResult"
+        ).innerHTML =
+            `<div class="message">
+                ${result.error}
+            </div>`;
+
+        return;
+    }
+
+
+    document.getElementById(
+        "lookupResult"
+    ).innerHTML = `
+
+        <div class="card">
+
+            <h3>${result.name}</h3>
+
+            <p>
+                Barcode: ${result.barcode}
+            </p>
+
+            <p>
+                Category: ${result.category}
+            </p>
+
+            <p>
+                Price: ₹${result.price}
+            </p>
+
+            <p>
+                Stock:
+                ${result.quantity}
+                ${result.unit}
+            </p>
+
+        </div>
+
+    `;
+}
+
+
+// ========================================
+// SELL
+// ========================================
+
+async function sellProduct() {
+
+    const data = {
+
+        barcode:
+            document.getElementById(
+                "sellBarcode"
+            ).value,
+
+        quantity:
+            document.getElementById(
+                "sellQuantity"
+            ).value
+
+    };
+
+
+    const response =
+        await fetch("/sell", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify(data)
+
+        });
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        showMessage(
+            "sellResult",
+            result.error
+        );
+
+        return;
+    }
+
+
+    showMessage(
+        "sellResult",
+
+        `${result.message}
+        | ${result.product}
+        | Sold: ${result.quantity_sold}
+        | Total: ₹${result.total_amount}
+        | Remaining: ${result.remaining_stock}`
+    );
+
+
+    loadProducts();
+    loadDashboard();
+    loadSales();
+    loadInventoryHistory();
+
+}
+
+
+// ========================================
+// RESTOCK
+// ========================================
+
+async function restockProduct() {
+
+    const data = {
+
+        barcode:
+            document.getElementById(
+                "restockBarcode"
+            ).value,
+
+        quantity:
+            document.getElementById(
+                "restockQuantity"
+            ).value
+
+    };
+
+
+    const response =
+        await fetch("/restock", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify(data)
+
+        });
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        showMessage(
+            "restockResult",
+            result.error
+        );
+
+        return;
+    }
+
+
+    showMessage(
+        "restockResult",
+
+        `${result.message}
+        | ${result.product}
+        | Added: ${result.quantity_added}
+        | New Stock: ${result.new_quantity}`
+    );
+
+
+    loadProducts();
+    loadDashboard();
+    loadInventoryHistory();
+
+}
+
+
+// ========================================
+// STOCK ADJUST
+// ========================================
+
+async function adjustStock() {
+
+    const data = {
+
+        barcode:
+            document.getElementById(
+                "adjustBarcode"
+            ).value,
+
+        quantity:
+            document.getElementById(
+                "adjustQuantity"
+            ).value,
+
+        reason:
+            document.getElementById(
+                "adjustReason"
+            ).value
+
+    };
+
+
+    const response =
+        await fetch("/adjust-stock", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify(data)
+
+        });
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        showMessage(
+            "adjustResult",
+            result.error
+        );
+
+        return;
+    }
+
+
+    showMessage(
+        "adjustResult",
+
+        `${result.message}
+        | ${result.product}
+        | Change: ${result.change}
+        | New Stock: ${result.new_stock}`
+    );
+
+
+    loadProducts();
+    loadDashboard();
+    loadInventoryHistory();
+
+}
+
+
+// ========================================
+// LOAD PRODUCTS
+// ========================================
+
+async function loadProducts() {
+
+    const response =
+        await fetch("/products");
+
+
+    productsCache =
+        await response.json();
+
+
+    const table =
+        document.getElementById(
+            "productsTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+    productsCache.forEach(product => {
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>${product.id}</td>
+
+                <td>${product.barcode}</td>
+
+                <td>${product.name}</td>
+
+                <td>${product.category || ""}</td>
+
+                <td>₹${product.price}</td>
+
+                <td>${product.quantity}</td>
+
+                <td>${product.unit}</td>
+
+                <td>${product.low_stock_level}</td>
+
+                <td>
+
+                    <button
+                        onclick="editProduct(
+                            ${product.id}
+                        )">
+
+                        Edit
+
+                    </button>
+
+                    <button
+                        class="danger"
+                        onclick="deleteProduct(
+                            ${product.id}
+                        )">
+
+                        Delete
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+
+    drawStockChart();
+
+}
+
+
+// ========================================
+// EDIT PRODUCT
+// ========================================
+
+async function editProduct(id) {
+
+    const product =
+        productsCache.find(
+            p => p.id === id
+        );
+
+
+    if (!product) return;
+
+
+    const name =
+        prompt(
+            "Product Name:",
+            product.name
+        );
+
+
+    if (name === null) return;
+
+
+    const price =
+        prompt(
+            "Price:",
+            product.price
+        );
+
+
+    if (price === null) return;
+
+
+    const category =
+        prompt(
+            "Category:",
+            product.category
+        );
+
+
+    if (category === null) return;
+
+
+    const unit =
+        prompt(
+            "Unit:",
+            product.unit
+        );
+
+
+    if (unit === null) return;
+
+
+    const lowStock =
+        prompt(
+            "Low Stock Level:",
+            product.low_stock_level
+        );
+
+
+    if (lowStock === null) return;
+
+
+    const data = {
+
+        barcode: product.barcode,
+
+        name: name,
+
+        category: category,
+
+        price: price,
+
+        unit: unit,
+
+        low_stock_level: lowStock
+
+    };
+
+
+    const response =
+        await fetch(
+            "/edit-product/" + id,
+            {
+
+                method: "PUT",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify(data)
+
+            }
+        );
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        alert(result.error);
+
+        return;
+    }
+
+
+    alert(result.message);
+
+    loadProducts();
+
+}
+
+
+// ========================================
+// DELETE
+// ========================================
+
+async function deleteProduct(id) {
+
+    if (!confirm(
+        "Delete this product?"
+    )) {
+
+        return;
+    }
+
+
+    const response =
+        await fetch(
+            "/delete-product/" + id,
+            {
+                method: "DELETE"
+            }
+        );
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        alert(result.error);
+
+        return;
+    }
+
+
+    alert(result.message);
+
+    loadProducts();
+    loadDashboard();
+
+}
+
+
+// ========================================
+// LOW STOCK
+// ========================================
+
+async function loadLowStock() {
+
+    const response =
+        await fetch("/low-stock");
+
+
+    const data =
+        await response.json();
+
+
+    const table =
+        document.getElementById(
+            "lowStockTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+    data.forEach(item => {
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>${item.name}</td>
+
+                <td>${item.barcode}</td>
+
+                <td>
+                    ${item.quantity}
+                    ${item.unit}
+                </td>
+
+                <td>
+                    ${item.low_stock_level}
+                    ${item.unit}
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+
+// ========================================
+// SALES
+// ========================================
+
+async function loadSales() {
+
+    const response =
+        await fetch("/sales");
+
+
+    const data =
+        await response.json();
+
+
+    const table =
+        document.getElementById(
+            "salesTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+    data.forEach(item => {
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>${item.sale_id}</td>
+
+                <td>${item.name}</td>
+
+                <td>${item.barcode}</td>
+
+                <td>
+                    ${item.quantity_sold}
+                    ${item.unit}
+                </td>
+
+                <td>
+                    ₹${item.total_amount}
+                </td>
+
+                <td>${item.sale_date}</td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+
+// ========================================
+// INVENTORY HISTORY
+// ========================================
+
+async function loadInventoryHistory() {
+
+    const response =
+        await fetch(
+            "/inventory-history"
+        );
+
+
+    inventoryHistoryCache =
+        await response.json();
+
+
+    displayInventoryHistory(
+        inventoryHistoryCache
+    );
+
+}
+
+
+function displayInventoryHistory(data) {
+
+    const table =
+        document.getElementById(
+            "inventoryHistoryTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+    if (data.length === 0) {
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td colspan="8"
+                    style="text-align:center">
+
+                    No history found
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+    }
+
+
+    data.forEach(item => {
+
+        const quantity =
+            Number(item.quantity);
+
+
+        const quantityText =
+            quantity > 0
+                ? "+" + quantity
+                : quantity;
+
+
+        let actionClass =
+            "action-add";
+
+
+        if (item.action === "SALE") {
+
+            actionClass =
+                "action-sale";
+
+        }
+
+        else if (
+            item.action === "RESTOCK"
+        ) {
+
+            actionClass =
+                "action-restock";
+
+        }
+
+        else if (
+            item.action === "ADJUST"
+        ) {
+
+            actionClass =
+                "action-adjust";
+
+        }
+
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>${item.history_id}</td>
+
+                <td>${item.name}</td>
+
+                <td>${item.barcode}</td>
+
+                <td>
+
+                    <span
+                        class="action ${actionClass}">
+
+                        ${item.action}
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    ${quantityText}
+                    ${item.unit}
+
+                </td>
+
+                <td>
+
+                    ${item.stock_after}
+                    ${item.unit}
+
+                </td>
+
+                <td>
+
+                    ${item.reason || ""}
+
+                </td>
+
+                <td>
+
+                    ${item.history_date}
+
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+
+// ========================================
+// FILTER HISTORY
+// ========================================
+
+function filterInventoryHistory() {
+
+    const search =
+        document.getElementById(
+            "historySearch"
+        ).value
+        .toLowerCase()
+        .trim();
+
+
+    const barcode =
+        document.getElementById(
+            "historyBarcode"
+        ).value
+        .toLowerCase()
+        .trim();
+
+
+    const action =
+        document.getElementById(
+            "historyAction"
+        ).value;
+
+
+    const filtered =
+        inventoryHistoryCache.filter(
+            item => {
+
+                const nameMatch =
+                    item.name
+                    .toLowerCase()
+                    .includes(search);
+
+
+                const barcodeMatch =
+                    item.barcode
+                    .toLowerCase()
+                    .includes(barcode);
+
+
+                const actionMatch =
+                    action === "ALL" ||
+                    item.action === action;
+
+
+                return (
+                    nameMatch &&
+                    barcodeMatch &&
+                    actionMatch
+                );
+
+            }
+        );
+
+
+    displayInventoryHistory(
+        filtered
+    );
+
+}
+
+
+function clearHistoryFilters() {
+
+    document.getElementById(
+        "historySearch"
+    ).value = "";
+
+
+    document.getElementById(
+        "historyBarcode"
+    ).value = "";
+
+
+    document.getElementById(
+        "historyAction"
+    ).value = "ALL";
+
+
+    displayInventoryHistory(
+        inventoryHistoryCache
+    );
+
+}
+
+
+// ========================================
+// DASHBOARD
+// ========================================
+
+async function loadDashboard() {
+
+    const response =
+        await fetch("/dashboard");
+
+
+    const data =
+        await response.json();
+
+
+    document.getElementById(
+        "totalProducts"
+    ).innerText =
+        data.total_products;
+
+
+    document.getElementById(
+        "totalStock"
+    ).innerText =
+        data.total_stock;
+
+
+    document.getElementById(
+        "lowStock"
+    ).innerText =
+        data.low_stock;
+
+
+    document.getElementById(
+        "totalSales"
+    ).innerText =
+        "₹" +
+        Number(
+            data.total_sales
+        ).toFixed(2);
+
+}
+
+
+// ========================================
+// SALES REPORT
+// ========================================
+
+async function loadSalesReport() {
+
+    const response =
+        await fetch(
+            "/sales-report"
+        );
+
+
+    const data =
+        await response.json();
+
+
+    document.getElementById(
+        "transactions"
+    ).innerText =
+        data.transactions;
+
+
+    document.getElementById(
+        "itemsSold"
+    ).innerText =
+        data.items_sold;
+
+
+    document.getElementById(
+        "revenue"
+    ).innerText =
+        "₹" +
+        Number(
+            data.revenue
+        ).toFixed(2);
+
+
+    document.getElementById(
+        "todaySales"
+    ).innerText =
+        "₹" +
+        Number(
+            data.today_sales
+        ).toFixed(2);
+
+}
+
+
+// ========================================
+// EXPORT
+// ========================================
+
+function downloadInventory() {
+
+    window.location.href =
+        "/export/inventory";
+
+}
+
+
+function downloadSales() {
+
+    window.location.href =
+        "/export/sales";
+
+}
+
+
+// ========================================
+// STOCK CHART
+// ========================================
+
+function drawStockChart() {
+
+    const container =
+        document.getElementById(
+            "stockChart"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (productsCache.length === 0) {
+
+        container.innerHTML =
+            "No products available.";
+
+        return;
+    }
+
+
+    const maxStock =
+        Math.max(
+            ...productsCache.map(
+                p => Number(p.quantity)
+            )
+        );
+
+
+    productsCache.slice(0, 10)
+        .forEach(product => {
+
+            const percentage =
+                maxStock === 0
+                    ? 0
+                    :
+                    (
+                        Number(
+                            product.quantity
+                        )
+                        /
+                        maxStock
+                    ) * 100;
+
+
+            container.innerHTML += `
+
+                <div class="bar-container">
+
+                    <div class="bar-label">
+
+                        <span>
+                            ${product.name}
+                        </span>
+
+                        <span>
+                            ${product.quantity}
+                            ${product.unit}
+                        </span>
+
+                    </div>
+
+                    <div
+                        class="bar"
+                        style="
+                            width:${percentage}%;
+                        ">
+
+                    </div>
+
+                </div>
+
+            `;
+
+        });
+
+}
+
+// ========================================
+// BARCODE SCANNER - QUAGGA2
+// ========================================
+
+let scannerRunning = false;
+let lastScannedBarcode = "";
+let lastScanTime = 0;
+
+
+function startScanner() {
+
+    if (scannerRunning) {
+        return;
+    }
+
+    if (typeof Quagga === "undefined") {
+
+        document.getElementById("scannerMessage").innerText =
+            "Quagga2 library load nahi hui.";
+
+        return;
+    }
+
+    scannerRunning = true;
+
+    document.getElementById("scannerMessage").innerText =
+        "Starting camera...";
+
+
+    Quagga.init({
+
+        inputStream: {
+
+            type: "LiveStream",
+
+            target: document.querySelector("#scanner"),
+
+            constraints: {
+
+                width: {
+                    min: 640
+                },
+
+                height: {
+                    min: 480
+                },
+
+                facingMode: "environment"
+
+            }
+
+        },
+
+        locator: {
+
+            patchSize: "medium",
+
+            halfSample: true
+
+        },
+
+        numOfWorkers:
+            navigator.hardwareConcurrency || 4,
+
+        frequency: 10,
+
+        decoder: {
+
+            readers: [
+                "ean_reader",
+                "ean_8_reader",
+                "upc_reader",
+                "upc_e_reader"
+            ]
+
+        },
+
+        locate: true
+
+    }, function(error) {
+
+        if (error) {
+
+            console.error(
+                "Quagga error:",
+                error
+            );
+
+            scannerRunning = false;
+
+            document.getElementById(
+                "scannerMessage"
+            ).innerText =
+                "Camera start nahi ho paya.";
+
+            return;
+        }
+
+
+        Quagga.start();
+
+
+        document.getElementById(
+            "scannerMessage"
+        ).innerText =
+            "Scanner active. Barcode camera ke saamne rakho.";
+
+    });
+
+
+    Quagga.onDetected(
+        barcodeDetected
+    );
+
+}
+
+
+async function barcodeDetected(result) {
+
+    if (!result || !result.codeResult) {
+        return;
+    }
+
+
+    const barcode =
+        result.codeResult.code;
+
+
+    if (!barcode) {
+        return;
+    }
+
+
+    const now = Date.now();
+
+
+    // Same barcode ko repeatedly detect hone se rokna
+    if (
+        barcode === lastScannedBarcode &&
+        now - lastScanTime < 3000
+    ) {
+        return;
+    }
+
+
+    lastScannedBarcode =
+        barcode;
+
+    lastScanTime =
+        now;
+
+
+    console.log(
+        "Barcode detected:",
+        barcode
+    );
+
+
+    // Lookup field
+    document.getElementById(
+        "lookupBarcode"
+    ).value = barcode;
+
+
+    // Sell field
+    document.getElementById(
+        "sellBarcode"
+    ).value = barcode;
+
+
+    // Restock field
+    document.getElementById(
+        "restockBarcode"
+    ).value = barcode;
+
+
+    // Adjustment field
+    document.getElementById(
+        "adjustBarcode"
+    ).value = barcode;
+
+
+    document.getElementById(
+        "scannerMessage"
+    ).innerText =
+        "Barcode detected: " + barcode;
+
+
+    // Database lookup
+    await lookupProduct();
+
+}
+
+
+function stopScanner() {
+
+    if (
+        typeof Quagga !== "undefined" &&
+        scannerRunning
+    ) {
+
+        Quagga.stop();
+
+        try {
+
+            Quagga.offDetected(
+                barcodeDetected
+            );
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
+    }
+
+
+    scannerRunning = false;
+
+
+    const scanner =
+        document.getElementById(
+            "scanner"
+        );
+
+
+    if (scanner) {
+
+        scanner.innerHTML = "";
+
+    }
+
+
+    document.getElementById(
+        "scannerMessage"
+    ).innerText =
+        "Scanner stopped.";
+
+}
+ 
+
+
+
+    document.getElementById(
+        "scannerVideo"
+    ).srcObject = null;
+
+}
+
+
+// ========================================
+// CAMERA
+// ========================================
+
+async function startCamera() {
+
+    try {
+
+        cameraStream =
+            await navigator.mediaDevices
+                .getUserMedia({
+                    video: true
+                });
+
+
+        document.getElementById(
+            "cameraVideo"
+        ).srcObject =
+            cameraStream;
+
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Camera started.";
+
+    }
+
+    catch (error) {
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Unable to access camera.";
+
+    }
+
+}
+
+
+function captureImage() {
+
+    const video =
+        document.getElementById(
+            "cameraVideo"
+        );
+
+
+    const canvas =
+        document.getElementById(
+            "cameraCanvas"
+        );
+
+
+    if (
+        video.videoWidth === 0
+    ) {
+
+        alert(
+            "Start camera first."
+        );
+
+        return;
+    }
+
+
+    canvas.width =
+        video.videoWidth;
+
+
+    canvas.height =
+        video.videoHeight;
+
+
+    const context =
+        canvas.getContext(
+            "2d"
+        );
+
+
+    context.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    document.getElementById(
+        "cameraMessage"
+    ).innerText =
+        "Image captured successfully. This image will later be sent to the Edge AI model.";
+
+}
+
+
+function stopCamera() {
+
+    if (cameraStream) {
+
+        cameraStream
+            .getTracks()
+            .forEach(
+                track =>
+                    track.stop()
+            );
+
+        cameraStream = null;
+
+    }
+
+
+    document.getElementById(
+        "cameraVideo"
+    ).srcObject = null;
+
+}
+
+
+// ========================================
+// LOAD EVERYTHING
+// ========================================
+
+window.onload = function() {
+
+    loadProducts();
+
+    loadDashboard();
+
+    loadSalesReport();
+
+    loadLowStock();
+
+    loadSales();
+
+    loadInventoryHistory();
+
+};
+
+</script>
+
+</body>
+
+</html>

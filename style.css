@@ -1,0 +1,116 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 40px;
+}
+
+h1 {
+    text-align: center;
+    color: #222;
+}
+
+h2 {
+    margin-top: 25px;
+    color: #333;
+}
+
+button {
+    padding: 12px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #2563eb;
+    color: white;
+    font-size: 14px;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+input {
+    padding: 12px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+#dashboard {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.dashboard-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    min-width: 200px;
+    flex: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.dashboard-card h3 {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+}
+
+.dashboard-card p {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+
+/* =========================
+   PRODUCT RESULT
+========================= */
+
+#result,
+#saleResult,
+#salesHistory {
+    background: white;
+    padding: 20px;
+    margin-top: 15px;
+    border-radius: 8px;
+}
+
+
+/* =========================
+   SCANNER
+========================= */
+
+#scanner {
+    margin-top: 20px;
+}
+
+
+/* =========================
+   TABLE
+========================= */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th {
+    background: #2563eb;
+    color: white;
+}
+
+td,
+th {
+    padding: 12px;
+    text-align: left;
+}
